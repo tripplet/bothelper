@@ -48,7 +48,7 @@ class TelegramBot(object):
             self.dispatcher.add_handler(CommandHandler("cancel", self.cmd_cancel))
             self.dispatcher.add_handler(CommandHandler("help", self.cmd_help))
         except Exception as exp:
-            print('Error creating telegram bot' + str(exp.strerr))
+            print('Error creating telegram bot' + str(exp))
 
     def start(self):
         """
@@ -179,6 +179,12 @@ class TelegramBot(object):
         if not self.is_authorized(bot, update):
             return
         self.cmd_help(bot, update)
+
+    def cmd_help(self, bot, update):
+        """
+        Empty help function should be overridden in subclass
+        """
+        pass
 
     def set_handle_response(self, chat_id, response_func):
         self._handle_response[chat_id] = response_func
