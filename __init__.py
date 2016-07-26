@@ -26,7 +26,7 @@ class TelegramBot(object):
             self.config_file = config_file
             self._reload_config_file()
 
-            self.version = TelegramBot.get_version(use_caller_version)
+            self.version = TelegramBot.get_version(use_caller_version, nb_levels_above=2)
             self.started = datetime.now()
 
             self._handle_response = dict()  # Function responsible for handling a response from the users
@@ -211,7 +211,7 @@ class TelegramBot(object):
             return date.strftime('%a %-d. %b - %H:%M')
 
     @staticmethod
-    def get_version(use_caller_version):
+    def get_version(use_caller_version, nb_levels_above=1):
         try:
             import subprocess
             import os
@@ -220,7 +220,7 @@ class TelegramBot(object):
             # Determine directory this file or the calling function is located in
             frame = inspect.currentframe()
             if use_caller_version:
-                frame = inspect.getouterframes(frame)[2].frame  # Got "up" to caller of constructor
+                frame = inspect.getouterframes(frame)[nb_levels_above].frame  # Got "up" to caller of constructor
             cwd = os.path.dirname(os.path.abspath(inspect.getfile(frame)))
 
             # try .version file
