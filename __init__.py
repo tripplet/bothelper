@@ -56,6 +56,7 @@ class TelegramBot(object):
         :return:
         """
         self.dispatcher.add_handler(MessageHandler([Filters.command], self.cmd_help))
+        print('Telegram bot active')
         self.updater.start_polling(clean=True, timeout=30)
 
     def _reload_config_file(self):
@@ -211,7 +212,7 @@ class TelegramBot(object):
             return date.strftime('%a %-d. %b - %H:%M')
 
     @staticmethod
-    def get_version(use_caller_version, nb_levels_above=1):
+    def get_version(use_caller_version=True, nb_levels_above=1):
         try:
             import subprocess
             import os
@@ -231,7 +232,7 @@ class TelegramBot(object):
                     return version
             else:
                 # try with git
-                return subprocess.check_output(['git', 'describe', '--long', '--always'], cwd=cwd).decode(
+                return subprocess.check_output(['git', 'describe', '--long', '--always', '--tags'], cwd=cwd).decode(
                     'utf8').strip()
         except Exception:
             return '?'
