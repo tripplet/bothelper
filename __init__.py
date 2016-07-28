@@ -229,7 +229,7 @@ class TelegramBot(object):
             if os.path.exists(version_file):
                 with open(version_file) as f:
                     version = f.read()
-                    return version
+                    return version.strip()
             else:
                 # try with git
                 return subprocess.check_output(['git', 'describe', '--long', '--always', '--tags'], cwd=cwd).decode(
