@@ -21,12 +21,13 @@ class TelegramBot(object):
                                                  resize_keyboard=True,
                                                  one_time_keyboard=True)
 
-    def __init__(self, config_file, use_caller_version=False):
+    def __init__(self, config_file):
         try:
+            self.dispatcher = None
             self.config_file = config_file
             self._reload_config_file()
 
-            self.version = TelegramBot.get_version(use_caller_version, nb_levels_above=2)
+            self.version = TelegramBot.get_version()
             self.started = datetime.now()
 
             self._handle_response = dict()  # Function responsible for handling a response from the users
@@ -212,16 +213,15 @@ class TelegramBot(object):
             return date.strftime('%a %-d. %b - %H:%M')
 
     @staticmethod
-    def get_version(use_caller_version=True, nb_levels_above=1):
+    def get_version():
         try:
             import subprocess
             import os
             import inspect
 
-            # Determine directory this file or the calling function is located in
-            frame = inspect.currentframe()
-            if use_caller_version:
-                frame = inspect.getouterframes(frame)[nb_levels_above].frame  # Got "up" to caller of constructor
+            # Determine directory of the main script file
+            frames = inspect.getouterframes(inspect.currentframe())
+            frame = frames[len(frames)-1].frame
             cwd = os.path.dirname(os.path.abspath(inspect.getfile(frame)))
 
             # try .version file
