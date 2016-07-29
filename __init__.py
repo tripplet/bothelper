@@ -210,7 +210,7 @@ class TelegramBot(object):
         if date is None:
             return 'None'
         else:
-            return date.strftime('%a %-d. %b - %H:%M')
+            return date.strftime('%a %d. %b - %H:%M')
 
     @staticmethod
     def get_version():
