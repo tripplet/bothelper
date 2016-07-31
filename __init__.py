@@ -3,16 +3,11 @@
 
 from datetime import datetime
 import logging
-import yaml
 
 import telegram  # pip install python-telegram-bot
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
 __author__ = 'ttobias'
-
-# Enable telegram bot logging
-logging.basicConfig(level=logging.ERROR,
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 
 class TelegramBot(object):
@@ -21,11 +16,10 @@ class TelegramBot(object):
                                                  resize_keyboard=True,
                                                  one_time_keyboard=True)
 
-    def __init__(self, config_file):
+    def __init__(self, config):
         try:
             self.dispatcher = None
-            self.config_file = config_file
-            self._reload_config_file()
+            self.cfg = config
 
             self.version = TelegramBot.get_version()
             self.started = datetime.now()
@@ -49,7 +43,7 @@ class TelegramBot(object):
             self.dispatcher.add_handler(CommandHandler("cancel", self.cmd_cancel))
             self.dispatcher.add_handler(CommandHandler("help", self.cmd_help))
         except Exception as exp:
-            print('Error creating telegram bot' + str(exp))
+            logging.error('Error creating telegram bot' + str(exp))
 
     def start(self):
         """
@@ -57,12 +51,8 @@ class TelegramBot(object):
         :return:
         """
         self.dispatcher.add_handler(MessageHandler([Filters.command], self.cmd_help))
-        print('Telegram bot active')
+        logging.info('Telegram bot active')
         self.updater.start_polling(clean=True, timeout=30)
-
-    def _reload_config_file(self):
-        with open(self.config_file) as fp:
-            self.cfg = yaml.load(fp)
 
     def send_message(self, chat_id, text, **args):
         self.bot.send_message(chat_id=chat_id, text=text, **args)
@@ -77,7 +67,7 @@ class TelegramBot(object):
         self.messages += 1
         return True
 
-    def is_admin(self, bot, update):
+    def is_admin(self, _, update):
         if "admins" in self.cfg \
                 and update.message.chat_id in self.cfg["users"] \
                 and update.message.chat_id in self.cfg["admins"]:
@@ -95,6 +85,9 @@ class TelegramBot(object):
                                'Am Leben seit: {}\n'
                                'Nachrichten verarbeitet: {}\n'
                           .format(self.version, TelegramBot.format_date(self.started), self.messages))
+
+    def _reload_config(self, content='', check_only=False):
+        pass
 
     def cmd_config(self, bot, update):
         if not self.is_admin(bot, update):
@@ -115,7 +108,7 @@ class TelegramBot(object):
                 resp_self.set_handle_response(resp_update.message.chat_id, None)
 
             elif resp_update.message.text == 'Neuladen':
-                self._reload_config_file()
+                self._reload_config()
                 resp_self.send_message(resp_update.message.chat_id,
                                        text='Erledigt',
                                        reply_markup=telegram.ReplyKeyboardHide())
@@ -131,7 +124,7 @@ class TelegramBot(object):
                     new_config = None
 
                     try:
-                        new_config = yaml.safe_load(resp)
+                        self._reload_config(content=resp, check_only=True)
                     except Exception as exp:
                         edit_self.send_message(edit_update.message.chat_id,
                                                text='Ungültige config: ' +
@@ -140,21 +133,8 @@ class TelegramBot(object):
                                                reply_markup=telegram.ForceReply())
                         return
 
-                    # Perform some basic config checks
-                    if 'users' not in new_config \
-                            or 'admins' not in new_config \
-                            or 'telegram_bot_token' not in new_config:
-                        edit_self.send_message(edit_update.message.chat_id,
-                                               text='Ungültige config\nConfig erneut eingeben. '
-                                                    'Benutze /cancel zum Abbrechen.',
-                                               reply_markup=telegram.ForceReply())
-                        return
-
                     if new_config is not None:
-                        with open(edit_self.config_file, 'w') as fp_config:
-                            fp_config.write(resp)
-
-                        self._reload_config_file()
+                        self._reload_config(content=resp)
 
                         edit_self.send_message(edit_update.message.chat_id, text='Erledigt',
                                                reply_markup=telegram.ReplyKeyboardHide())
@@ -203,7 +183,7 @@ class TelegramBot(object):
 
     @staticmethod
     def bot_error(bot, update, error):
-        print('Update "%s" caused error "%s"' % (update, error))
+        logging.error('Update "%s" caused error "%s"' % (update, error))
 
     @staticmethod
     def format_date(date):
