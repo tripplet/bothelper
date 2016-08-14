@@ -182,7 +182,7 @@ class TelegramBot(object):
             self._handle_response[chat_id](self, update)
 
     @staticmethod
-    def bot_error(bot, update, error):
+    def bot_error(_, update, error):
         logging.error('Update "%s" caused error "%s"' % (update, error))
 
     @staticmethod
@@ -194,6 +194,7 @@ class TelegramBot(object):
 
     @staticmethod
     def get_version():
+        # noinspection PyBroadException
         try:
             import subprocess
             import os
