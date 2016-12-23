@@ -36,7 +36,7 @@ class TelegramBot(object):
             self.dispatcher.add_error_handler(TelegramBot.bot_error)
 
             # add basic commands
-            self.dispatcher.add_handler(MessageHandler([Filters.text], self.rx_message))
+            self.dispatcher.add_handler(MessageHandler(Filters.text, self.rx_message))
 
             self.dispatcher.add_handler(CommandHandler("info", self.cmd_info))
             self.dispatcher.add_handler(CommandHandler("start", self.cmd_start))
@@ -50,7 +50,7 @@ class TelegramBot(object):
         Start the bot.
         :return:
         """
-        self.dispatcher.add_handler(MessageHandler([Filters.command], self.cmd_help))
+        self.dispatcher.add_handler(MessageHandler(Filters.command, self.cmd_help))
         logging.info('Telegram bot active')
         self.updater.start_polling(clean=True, timeout=30)
 
