@@ -58,6 +58,9 @@ class TelegramBot(object):
         self.bot.send_message(chat_id=chat_id, text=text, **args)
         self.messages += 1
 
+    def send_typing(self, chat_id):
+        self.bot.send_chat_action(chat_id = chat_id, action=telegram.ChatAction.TYPING)
+
     def is_authorized(self, bot, update):
         if update.message.chat_id not in self.cfg["users"]:
             self.send_message(update.message.chat_id, text='Unauthorized: %d' % update.message.chat_id)
