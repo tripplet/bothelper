@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 
 import telegram  # pip install python-telegram-bot
@@ -11,6 +11,9 @@ __author__ = 'ttobias'
 
 
 class TelegramBot(object):
+    _today_str = "Heute"
+    _yesterday_str = "Gestern"
+
     _reply_config = telegram.ReplyKeyboardMarkup([['Inhalt', 'Neuladen'],
                                                   ['Bearbeiten', 'Abbrechen']],
                                                  resize_keyboard=True,
@@ -188,12 +191,19 @@ class TelegramBot(object):
     def bot_error(_, update, error):
         logging.error('Update "%s" caused error "%s"' % (update, error))
 
-    @staticmethod
-    def format_date(date):
+    @classmethod
+    def format_date(cls, date):
         if date is None:
             return 'None'
         else:
-            return date.strftime('%a %d. %b - %H:%M')
+            today = datetime.today().date()
+            if date.date() == today:
+                format_str = '{} %H:%M'.format(cls._today_str)
+            elif date.date() == today + timedelta(days=-1):
+                format_str = '{} %H:%M'.format(cls._yesterday_str)
+            else:
+                format_str = '%a %d. %b - %H:%M'
+            return date.strftime(format_str)
 
     @staticmethod
     def get_version():
