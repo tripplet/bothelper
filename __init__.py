@@ -6,6 +6,7 @@ import logging
 
 import telegram  # pip install python-telegram-bot
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram.utils.request import Request
 
 __author__ = 'ttobias'
 
@@ -30,7 +31,7 @@ class TelegramBot(object):
             self._handle_response = dict()  # Function responsible for handling a response from the users
             self.messages = 0  # Number of messages processed
 
-            self.bot = telegram.Bot(token=self.cfg['telegram_bot_token'])
+            self._bot = telegram.Bot(token=self.cfg['telegram_bot_token'], request=Request(con_pool_size=4))
             self._updater = Updater(bot=self._bot)
 
             # Get the dispatcher to register handlers
