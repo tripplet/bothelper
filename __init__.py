@@ -31,10 +31,10 @@ class TelegramBot(object):
             self.messages = 0  # Number of messages processed
 
             self.bot = telegram.Bot(token=self.cfg['telegram_bot_token'])
-            self.updater = Updater(bot=self.bot)
+            self._updater = Updater(bot=self._bot)
 
             # Get the dispatcher to register handlers
-            self.dispatcher = self.updater.dispatcher
+            self.dispatcher = self._updater.dispatcher
 
             self.dispatcher.add_error_handler(TelegramBot.bot_error)
 
@@ -49,20 +49,17 @@ class TelegramBot(object):
             logging.error('Error creating telegram bot' + str(exp))
 
     def start(self):
-        """
-        Start the bot.
-        :return:
-        """
+        """Start the bot."""
         self.dispatcher.add_handler(MessageHandler(Filters.command, self.cmd_help))
         logging.info('Telegram bot active')
-        self.updater.start_polling(clean=True, timeout=30)
+        self._updater.start_polling(clean=True, timeout=30)
 
     def send_message(self, chat_id, text, **args):
-        self.bot.send_message(chat_id=chat_id, text=text, **args)
+        self._bot.send_message(chat_id=chat_id, text=text, **args)
         self.messages += 1
 
     def send_typing(self, chat_id):
-        self.bot.send_chat_action(chat_id = chat_id, action=telegram.ChatAction.TYPING)
+        self._bot.send_chat_action(chat_id = chat_id, action=telegram.ChatAction.TYPING)
 
     def is_authorized(self, bot, update):
         if update.message.chat_id not in self.cfg["users"]:
@@ -110,14 +107,14 @@ class TelegramBot(object):
 
                 resp_self.send_message(resp_update.message.chat_id,
                                        text=config_text,
-                                       reply_markup=telegram.ReplyKeyboardHide())
+                                       reply_markup=telegram.ReplyKeyboardRemove())
                 resp_self.set_handle_response(resp_update.message.chat_id, None)
 
             elif resp_update.message.text == 'Neuladen':
                 self._reload_config()
                 resp_self.send_message(resp_update.message.chat_id,
                                        text='Erledigt',
-                                       reply_markup=telegram.ReplyKeyboardHide())
+                                       reply_markup=telegram.ReplyKeyboardRemove())
                 resp_self.set_handle_response(resp_update.message.chat_id, None)
 
             elif resp_update.message.text == 'Bearbeiten':
@@ -143,7 +140,7 @@ class TelegramBot(object):
                         self._reload_config(content=resp)
 
                         edit_self.send_message(edit_update.message.chat_id, text='Erledigt',
-                                               reply_markup=telegram.ReplyKeyboardHide())
+                                               reply_markup=telegram.ReplyKeyboardRemove())
                         edit_self.set_handle_response(edit_update.message.chat_id, None)
 
                 resp_self.set_handle_response(resp_update.message.chat_id, _response_edit)
@@ -160,7 +157,7 @@ class TelegramBot(object):
         if not self.is_authorized(bot, update):
             return
 
-        self.send_message(update.message.chat_id, text='Abgebrochen', reply_markup=telegram.ReplyKeyboardHide())
+        self.send_message(update.message.chat_id, text='Abgebrochen', reply_markup=telegram.ReplyKeyboardRemove())
         self.set_handle_response(update.message.chat_id, None)
 
     def cmd_start(self, bot, update):
