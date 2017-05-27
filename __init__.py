@@ -224,7 +224,7 @@ class TelegramBot(object):
             version_file = os.path.join(cwd, '.version')
             if os.path.exists(version_file):
                 with open(version_file) as f:
-                    TelegramBot.version = f.read().strip()
+                    TelegramBot.__version = f.read().strip()
             else:
                 # try with git
                 git_commit = subprocess.check_output(
