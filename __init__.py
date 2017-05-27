@@ -12,6 +12,7 @@ __author__ = 'ttobias'
 
 
 class TelegramBot(object):
+    __version = None
     _today_str = "Heute"
     _yesterday_str = "Gestern"
 
@@ -205,6 +206,9 @@ class TelegramBot(object):
 
     @staticmethod
     def get_version():
+        if TelegramBot.__version is not None:
+            return TelegramBot.__version
+
         # noinspection PyBroadException
         try:
             import subprocess
@@ -220,11 +224,15 @@ class TelegramBot(object):
             version_file = os.path.join(cwd, '.version')
             if os.path.exists(version_file):
                 with open(version_file) as f:
-                    version = f.read()
-                    return version.strip()
+                    TelegramBot.version = f.read().strip()
             else:
                 # try with git
-                return subprocess.check_output(['git', 'describe', '--long', '--always', '--tags'], cwd=cwd).decode(
-                    'utf8').strip()
+                git_commit = subprocess.check_output(
+                    ['git', 'describe', '--long', '--always', '--tags'], cwd=cwd).decode('utf8').strip()
+                git_commit_date = subprocess.check_output(
+                    ['git', 'show', '-s', '--format=%ci', '--date=local'], cwd=cwd).decode('utf8').strip()[:19]
+                TelegramBot.__version = '{} ({})'.format(git_commit, git_commit_date)
         except Exception:
-            return '?'
+            TelegramBot.__version = '?'
+
+        return TelegramBot.__version
