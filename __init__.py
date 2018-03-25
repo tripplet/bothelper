@@ -32,7 +32,7 @@ class TelegramBot(object):
             self._handle_response = dict()  # Function responsible for handling a response from the users
             self.messages = 0  # Number of messages processed
 
-            self._bot = telegram.Bot(token=self.cfg['telegram_bot_token'], request=Request(con_pool_size=4))
+            self._bot = telegram.Bot(token=self.cfg['telegram_bot_token'], request=Request(con_pool_size=8))
             self._updater = Updater(bot=self._bot)
 
             # Get the dispatcher to register handlers
@@ -55,6 +55,10 @@ class TelegramBot(object):
         self.dispatcher.add_handler(MessageHandler(Filters.command, self.cmd_help))
         logging.info('Telegram bot active')
         self._updater.start_polling(clean=True, timeout=30)
+
+    def idle(self):
+        """Execute idle loop"""
+        self._updater.idle()
 
     def send_message(self, chat_id, text, **args):
         self._bot.send_message(chat_id=chat_id, text=text, **args)
