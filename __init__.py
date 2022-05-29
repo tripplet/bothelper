@@ -54,7 +54,7 @@ class TelegramBot(object):
         """Start the bot."""
         self.dispatcher.add_handler(MessageHandler(Filters.command, self.cmd_help))
         logging.info('Telegram bot active')
-        self._updater.start_polling(clean=True, timeout=30)
+        self._updater.start_polling(drop_pending_updates=True, timeout=30)
 
     def idle(self):
         """Execute idle loop"""
